@@ -5,7 +5,7 @@ import "./inte.css";
 
 const Integration = () => {
   const [fetchedUserInfo, setFetchedUserInfo] = useState({
-    userId: "",
+    userFacebookId: "",
     accessToken: "",
   });
 
@@ -36,10 +36,10 @@ const Integration = () => {
   }, []);
 
   useEffect(() => {
-    if (fetchedUserInfo.userId && fetchedUserInfo.accessToken) {
+    if (fetchedUserInfo.userFacebookId && fetchedUserInfo.accessToken) {
       fetchUserInfo();
     }
-  }, [fetchedUserInfo.userId, fetchedUserInfo.accessToken]);
+  }, [fetchedUserInfo.userFacebookId, fetchedUserInfo.accessToken]);
 
   //initialize facebook login
   const handleFacebookLogin = async () => {
@@ -47,7 +47,7 @@ const Integration = () => {
       if (response.status === "connected") {
         console.log("You are already logged in and authenticated");
         setFetchedUserInfo({
-          userId: response.authResponse.userID,
+          userFacebookId: response.authResponse.userID,
           accessToken: response.authResponse.accessToken,
         });
       } else {
@@ -63,7 +63,7 @@ const Integration = () => {
         if (response.authResponse) {
           console.log("Welcome! Fetching your information....");
           setFetchedUserInfo({
-            userId: response.authResponse.userID,
+            userFacebookId: response.authResponse.userID,
             accessToken: response.authResponse.accessToken,
           });
         } else {
@@ -78,13 +78,24 @@ const Integration = () => {
   };
 
   const fetchUserInfo = async () => {
-    if (fetchedUserInfo.userId && fetchedUserInfo.accessToken) {
+    if (fetchedUserInfo.userFacebookId && fetchedUserInfo.accessToken) {
       try {
-        const response = await axios.post(`${BASE_URL}auth/userDetails`, {
-          userId: fetchedUserInfo.userId,
-          accessToken: fetchedUserInfo.accessToken,
-        });
+        const response = await axios.post(
+          `${BASE_URL}userFacebook/register`,
+          {
+            userFacebookId: fetchedUserInfo.userFacebookId,
+            accessToken: fetchedUserInfo.accessToken,
+          },
+          {
+            headers: {
+              authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
         console.log(response.data);
+        if (response.data === "UserFacebook registered successfully.") {
+          //code
+        }
       } catch (error) {
         console.error(error);
       }

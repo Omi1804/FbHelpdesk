@@ -1,14 +1,8 @@
-import jwt from "jsonwebtoken";
-import { User } from "../model";
+const jwt = require("jsonwebtoken");
 const secretKey = process.env.JWT_Secret;
+const { User } = require("../model");
 
-if (!secretKey) {
-  throw new Error(
-    "JWT Secret Key is not defined in the environment variables."
-  );
-}
-
-export const authenticateUser = (req, res, next) => {
+const authenticateUser = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -36,7 +30,7 @@ export const authenticateUser = (req, res, next) => {
     const { email, password } = data;
 
     // Use hashed password for comparison
-    const existingUser = await Admins.findOne({
+    const existingUser = await User.findOne({
       email: email,
       password: password,
     });
@@ -45,8 +39,9 @@ export const authenticateUser = (req, res, next) => {
       return res.status(403).json({ message: "User not found!" });
     }
 
-    req.headers["userEmail"] = existingUser.email;
-    req.headers["userPassword"] = existingUser.password;
+    req.headers["userId"] = existingUser.user_id;
     next();
   });
 };
+
+module.exports = authenticateUser;

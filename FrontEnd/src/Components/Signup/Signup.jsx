@@ -5,6 +5,7 @@ import axios from "axios";
 import { BASE_URL } from "../../config.js";
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -13,7 +14,6 @@ const Signup = () => {
   });
 
   const handleChange = (e) => {
-    const navigate = useNavigate();
     const { name, value, type, checked } = e.target;
     setFormData((prevFormData) => ({
       ...prevFormData,

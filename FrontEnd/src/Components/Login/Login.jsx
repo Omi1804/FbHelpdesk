@@ -5,13 +5,13 @@ import axios from "axios";
 import { BASE_URL } from "../../config.js";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
   const handleChange = (e) => {
-    const navigate = useNavigate();
     const { name, value } = e.target;
     setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
   };

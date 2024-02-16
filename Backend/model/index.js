@@ -6,12 +6,13 @@ const UserSchema = new mongoose.Schema({
 });
 
 const UserFacebookSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   facebookUserId: { type: String, required: true, unique: true },
   longLivedAccessToken: { type: String, required: true },
 });
 
 const PageSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  userFacebookId: { type: mongoose.Schema.Types.ObjectId, ref: "UserFacebook" },
   pageId: { type: String, required: true },
   pageName: { type: String, required: true },
   pageAccessToken: { type: String, required: true },
