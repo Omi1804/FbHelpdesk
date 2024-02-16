@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Register, Login } from "./Components";
+import { Login, Signup } from "./Components";
 import "./App.css";
 import Integration from "./Components/FbIntegration/Integration";
 
@@ -9,9 +9,9 @@ const App = () => {
     <div className="appComponent">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Integration />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Integration />} />
         </Routes>
       </BrowserRouter>
     </div>

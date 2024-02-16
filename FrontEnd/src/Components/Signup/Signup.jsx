@@ -1,29 +1,34 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import "./signup.css";
 import { useNavigate } from "react-router-dom";
-import "./login.css";
 import axios from "axios";
 import { BASE_URL } from "../../config.js";
 
-const Login = () => {
+const Signup = () => {
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
+    rememberMe: false,
   });
 
   const handleChange = (e) => {
     const navigate = useNavigate();
-    const { name, value } = e.target;
-    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${BASE_URL}user/login`, formData);
+      const response = await axios.post(`${BASE_URL}user/signup`, formData);
       const data = response.data;
-      if (data.message === "User logged in successfully!") {
+      if (data.message === "User signed in successfully.") {
         localStorage.setItem("token", data.token);
-        navigate("/register");
+        navigate("/login");
       }
       console.log(data);
     } catch (error) {
@@ -34,7 +39,15 @@ const Login = () => {
   return (
     <div className="signup-container">
       <form className="signup-form" onSubmit={handleSubmit}>
-        <h2>Login into your account</h2>
+        <h2>Create Account</h2>
+        <label htmlFor="name">Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+        />
 
         <label htmlFor="email">Email</label>
         <input
@@ -54,13 +67,23 @@ const Login = () => {
           onChange={handleChange}
         />
 
-        <button type="submit">Login</button>
+        <label className="remember-me">
+          <input
+            type="checkbox"
+            name="rememberMe"
+            checked={formData.rememberMe}
+            onChange={handleChange}
+          />
+          Remember Me
+        </label>
+
+        <button type="submit">Sign Up</button>
         <p className="login-link">
-          New to Fb Helpdesk ? <a href="/singup">Sign Up</a>
+          Already have an account? <a href="/login">Login</a>
         </p>
       </form>
     </div>
   );
 };
 
-export default Login;
+export default Signup;
