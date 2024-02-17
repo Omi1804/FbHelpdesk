@@ -68,10 +68,25 @@ async function fetchConversations(pageAccessToken, pageId) {
 
     const conversations = response.data.data.map((conv) => {
       const lastMessage = conv.messages.data[0];
+
+      const isLastMessageFromPage = lastMessage.from.id === pageId;
+      let initiatorName, initiatorFacebookId;
+
+      if (!isLastMessageFromPage) {
+        initiatorName = lastMessage.from.name;
+        initiatorFacebookId = lastMessage.from.id;
+      } else {
+        const recipient = conv.participants.data.find(
+          (participant) => participant.id !== pageId
+        );
+        initiatorName = recipient.name;
+        initiatorFacebookId = recipient.id;
+      }
+
       return {
         conversationId: conv.id,
-        initiatorName: lastMessage.from.name,
-        initiatorFacebookId: lastMessage.from.id,
+        initiatorName: initiatorName,
+        initiatorFacebookId: initiatorFacebookId,
         lastMessage: lastMessage.message,
         lastMessageTimestamp: lastMessage.created_time,
       };

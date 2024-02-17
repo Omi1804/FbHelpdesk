@@ -5,7 +5,7 @@ const axios = require("axios");
 const authenticateUser = require("../middleware/auth");
 
 router.get("/:conversationId/messages", authenticateUser, async (req, res) => {
-  const conversationId = req.params.conversationId;
+  const conversationId = req.params.conversationId; // actual stirng id
 
   try {
     const messages = await Message.find({
@@ -24,7 +24,7 @@ router.get("/:conversationId/messages", authenticateUser, async (req, res) => {
 });
 
 router.post("/:conversationId/send", authenticateUser, async (req, res) => {
-  const conversationId = req.params.conversationId;
+  const conversationId = req.params.conversationId; //object id
   const { messageContent } = req.body;
 
   try {
@@ -32,8 +32,6 @@ router.post("/:conversationId/send", authenticateUser, async (req, res) => {
       path: "pageId",
       populate: { path: "userFacebookId" },
     });
-
-    console.log(conversation);
 
     if (!conversation) {
       return res.status(404).send("Conversation not found.");
@@ -63,15 +61,14 @@ router.post("/:conversationId/send", authenticateUser, async (req, res) => {
       }
     );
 
-    // If the message is successfully sent, Facebook's API returns a message_id
     if (response.data && response.data.message_id) {
       const newMessage = new Message({
-        conversationId: conversation._id, // MongoDB ObjectId of the conversation
-        fbConversationId: conversation.conversationId, // Facebook's conversation ID
+        conversationId: conversation._id,
+        fbConversationId: conversation.conversationId,
         messageId: response.data.message_id,
         messageContent,
-        senderId: "Page", // Adjust as needed, e.g., to match the sender's real ID
-        timestamp: new Date(), // Consider using the timestamp from Facebook's response if available
+        senderId: conversation.pageId.pageId,
+        timestamp: new Date(),
       });
 
       await newMessage.save();
@@ -81,7 +78,9 @@ router.post("/:conversationId/send", authenticateUser, async (req, res) => {
     }
   } catch (error) {
     console.error("Error sending message:", error.message);
-    res.status(500).send("An error occurred while sending the message.");
+    res
+      .status(500)
+      .json({ message: "An error occurred while sending the message." });
   }
 });
 
