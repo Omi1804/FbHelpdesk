@@ -21,17 +21,20 @@ const PageSchema = new mongoose.Schema({
 const ConversationSchema = new mongoose.Schema({
   pageId: { type: mongoose.Schema.Types.ObjectId, ref: "Page" },
   conversationId: { type: String, required: true, unique: true },
-  lastMessageTimestamp: { type: Date },
+  initiatorName: { type: String, required: true },
+  initiatorFacebookId: { type: String, required: true },
+  lastMessage: { type: String, required: true },
+  lastMessageTimestamp: { type: Date, required: true },
 });
 
 const MessageSchema = new mongoose.Schema({
   conversationId: { type: mongoose.Schema.Types.ObjectId, ref: "Conversation" },
+  fbConversationId: { type: String, required: true },
   messageId: { type: String, required: true, unique: true },
   messageContent: { type: String, required: true },
-  senderId: { type: String, required: true },
+  senderId: { type: String, required: true }, // Ensure this aligns with your data model, may represent a Page or User ID
   timestamp: { type: Date, required: true },
 });
-
 module.exports = {
   User: mongoose.model("User", UserSchema),
   UserFacebook: mongoose.model("UserFacebook", UserFacebookSchema),

@@ -39,7 +39,7 @@ const authenticateUser = (req, res, next) => {
       return res.status(403).json({ message: "User not found!" });
     }
 
-    req.headers["userId"] = existingUser.user_id;
+    req.headers["userId"] = existingUser._id;
     next();
   });
 };

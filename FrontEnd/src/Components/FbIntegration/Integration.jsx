@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { BASE_URL, APP_ID } from "../../config";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./inte.css";
 
 const Integration = () => {
+  const navigate = useNavigate();
   const [fetchedUserInfo, setFetchedUserInfo] = useState({
     userFacebookId: "",
     accessToken: "",
@@ -93,8 +95,8 @@ const Integration = () => {
           }
         );
         console.log(response.data);
-        if (response.data === "UserFacebook registered successfully.") {
-          //code
+        if (response.data.message === "UserFacebook registered successfully.") {
+          navigate("/pages");
         }
       } catch (error) {
         console.error(error);

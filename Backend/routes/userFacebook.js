@@ -1,12 +1,14 @@
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
-const { UserFacebook, Page, Conversation, Message } = require("../model");
+const { UserFacebook, Page, Conversation, Message, User } = require("../model");
 const authenticateUser = require("../middleware/auth");
 
 router.post("/register", authenticateUser, async (req, res) => {
   const { userFacebookId, accessToken } = req.body;
   const { userId } = req.headers;
+
+  console.log(userId);
 
   try {
     if (!userFacebookId || !accessToken) {
@@ -47,81 +49,47 @@ router.post("/register", authenticateUser, async (req, res) => {
   }
 });
 
-router.post("/fetchPages", authenticateUser, async (req, res) => {});
+router.get("/fetchPages", authenticateUser, async (req, res) => {
+  const { userId } = req.headers;
 
-// router.post("/userDetails", async (req, res) => {
-//   const { userId, accessToken } = req.body;
+  try {
+    const user = await UserFacebook.findOne({ userId: userId });
+    if (!user) {
+      return res.status(404).send("User not found.");
+    }
 
-//   try {
-//     // Validate request body
-//     if (!userId || !accessToken) {
-//       return res.status(400).send("Missing userId or accessToken.");
-//     }
+    const pageTokens = await fetchPageAccessTokens(user.longLivedAccessToken);
+    if (pageTokens.length === 0) {
+      return res
+        .status(500)
+        .send("No pages found or failed to fetch page tokens.");
+    }
 
-//     // Step 1: Verify the access token
-//     if (!(await verifyAccessToken(accessToken))) {
-//       return res.status(400).send("Invalid access token.");
-//     }
+    const pagesDetails = await Promise.all(
+      pageTokens.map(async (pageToken) => {
+        const page = await Page.findOneAndUpdate(
+          { pageId: pageToken.id, userFacebookId: user._id },
+          {
+            $set: {
+              pageName: pageToken.name,
+              pageAccessToken: pageToken.accessToken,
+            },
+          },
+          { new: true, upsert: true }
+        );
+        return page;
+      })
+    );
 
-//     // Step 2: Exchange for a long-lived token
-//     const longLivedToken = await exchangeForLongLivedToken(accessToken);
-//     if (!longLivedToken) {
-//       return res.status(500).send("Failed to exchange for long-lived token.");
-//     }
-
-//     // Save or update the user in the database
-//     let user = await User.findOne({ facebookUserId: userId });
-//     if (!user) {
-//       user = new User({
-//         facebookUserId: userId,
-//         longLivedAccessToken: longLivedToken,
-//       });
-//     } else {
-//       user.longLivedAccessToken = longLivedToken; // Update the token if the user already exists
-//     }
-//     await user.save();
-
-//     // Step 3: Fetch page access tokens
-//     const pageTokens = await fetchPageAccessTokens(longLivedToken, user._id);
-//     if (pageTokens.length === 0) {
-//       return res
-//         .status(500)
-//         .send("No pages found or failed to fetch page tokens.");
-//     }
-
-//     const pagesDetails = await Promise.all(
-//       pageTokens.map(async (pageToken) => {
-//         const page = await Page.findOneAndUpdate(
-//           { pageId: pageToken.id, userId: user._id },
-//           {
-//             $set: {
-//               pageName: pageToken.name,
-//               pageAccessToken: pageToken.accessToken,
-//             },
-//           },
-//           { new: true, upsert: true }
-//         );
-//         return page;
-//       })
-//     );
-
-//     // And possibly set up webhooks for each page
-//     // const pagesConversations = await fetchConversationsForAllPages(pageTokens);
-//     // console.log(pagesConversations);
-
-//     res.send({
-//       message: "User details and pages processed successfully.",
-//       pageTokens: pagesDetails.map(({ pageId, pageName, pageAccessToken }) => ({
-//         pageId,
-//         pageName,
-//         pageAccessToken,
-//       })),
-//     });
-//   } catch (error) {
-//     console.error("Error processing userDetails:", error);
-//     res.status(500).send("An error occurred while processing user details.");
-//   }
-// });
+    res.send({
+      message: "Pages fetched and saved successfully.",
+      pages: pagesDetails,
+    });
+  } catch (error) {
+    console.error("Error fetching pages:", error);
+    res.status(500).send("An error occurred while fetching pages.");
+  }
+});
 
 // Helper functions
 async function verifyAccessToken(accessToken) {
@@ -152,41 +120,20 @@ async function exchangeForLongLivedToken(accessToken) {
   }
 }
 
-// async function fetchPageAccessTokens(userLongLivedToken) {
-//   const pagesUrl = `https://graph.facebook.com/me/accounts?access_token=${userLongLivedToken}&fields=id,name,access_token`;
+async function fetchPageAccessTokens(userLongLivedToken) {
+  const pagesUrl = `https://graph.facebook.com/me/accounts?access_token=${userLongLivedToken}&fields=id,name,access_token`;
 
-//   try {
-//     const response = await axios.get(pagesUrl);
-//     return response.data.data.map((page) => ({
-//       id: page.id,
-//       name: page.name,
-//       accessToken: page.access_token,
-//     }));
-//   } catch (error) {
-//     console.error("Error fetching page tokens:", error);
-//     return [];
-//   }
-// }
-
-//gives the messages
-// async function fetchConversationsForAllPages(pageTokens) {
-//   try {
-//     const conversationsPromises = pageTokens.map(async (page) => {
-//       const pageConversationsUrl = `https://graph.facebook.com/${page.id}/conversations?fields=participants,messages.limit(10){id,message}&access_token=${page.accessToken}`;
-//       const response = await axios.get(pageConversationsUrl);
-//       return {
-//         pageId: page.id,
-//         conversations: response.data.data,
-//       };
-//     });
-
-//     const pagesConversations = await Promise.all(conversationsPromises);
-//     console.log(pagesConversations);
-//     return pagesConversations;
-//   } catch (error) {
-//     console.error("Error fetching conversations:", error);
-//     return [];
-//   }
-// }
+  try {
+    const response = await axios.get(pagesUrl);
+    return response.data.data.map((page) => ({
+      id: page.id,
+      name: page.name,
+      accessToken: page.access_token,
+    }));
+  } catch (error) {
+    console.error("Error fetching page tokens:", error);
+    return [];
+  }
+}
 
 module.exports = router;
