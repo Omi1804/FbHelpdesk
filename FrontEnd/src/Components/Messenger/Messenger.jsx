@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
-import { formatDistance } from "date-fns";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./messenger.css";
+import { formatDistance } from "date-fns";
 import { useParams } from "react-router-dom";
 import { BASE_URL } from "../../config";
 import ChatUi from "../Elements/ChatUi/ChatUi";
 import UserDetails from "../Elements/UserDetails/UserDetails";
+import "./messenger.css";
+
+const POLL_INTERVAL = 1000 * 10;
 
 const Messenger = () => {
   const params = useParams();
@@ -15,34 +17,10 @@ const Messenger = () => {
   const [messages, setMessages] = useState([]);
   const [userDetails, setUserDetails] = useState(null);
 
-  useEffect(() => {
-    const fetchCoversations = async () => {
-      try {
-        const response = await axios.get(
-          `${BASE_URL}pages/${pageId}/conversations`,
-          {
-            headers: {
-              authorization: "Bearer " + localStorage.getItem("token"),
-            },
-          }
-        );
-        setConversations(response.data.conversations);
-      } catch (error) {
-        console.error("Error fetching conversations:", error);
-        // Handle error, e.g., set an error state, show a message, etc.
-      }
-    };
+  console.log(messages);
 
-    fetchCoversations();
-  }, [pageId]);
-
-  const handleConversationClick = async (conversationId) => {
-    const selected = conversations.find(
-      (conv) => conv.conversationId === conversationId
-    );
-    setSelectedConversation(selected);
-
-    // Fetch messages for the selected conversation
+  // Function to fetch messages for a given conversation
+  const fetchMessages = async (conversationId) => {
     try {
       const response = await axios.get(
         `${BASE_URL}conversations/${conversationId}/messages`,
@@ -53,20 +31,65 @@ const Messenger = () => {
         }
       );
       setMessages(response.data);
-
-      setUserDetails({
-        name: selected.initiatorName,
-      });
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
 
-  const currentUserId = "186383267901490";
+  // Function to handle conversation selection
+  const handleConversationClick = async (conversationId) => {
+    const selected = conversations.find(
+      (conv) => conv.conversationId === conversationId
+    );
+    setSelectedConversation(selected);
 
+    // Fetch messages for the selected conversation
+    await fetchMessages(conversationId);
+
+    // Update user details
+    setUserDetails({
+      name: selected.initiatorName,
+    });
+  };
+
+  // Effect to fetch conversations on component mount and selectedConversation change
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}pages/${pageId}/conversations`,
+          {
+            headers: {
+              authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setConversations(response.data.conversations);
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+      }
+    };
+
+    fetchConversations();
+  }, [pageId]);
+
+  // Polling for new messages
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      if (selectedConversation) {
+        fetchMessages(selectedConversation.conversationId);
+      }
+    }, POLL_INTERVAL);
+
+    return () => clearInterval(pollInterval);
+  }, [selectedConversation]);
+
+  // Function to update messages after a new message is sent
   const handleMessageSent = (newMessage) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
   };
+
+  const currentUserId = "186383267901490"; // Replace with the actual current user ID
 
   return (
     <section className="messengerSec">
