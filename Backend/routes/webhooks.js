@@ -23,6 +23,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   let body = req.body;
 
+  console.log(body);
   if (body.object === "page") {
     body.entry.forEach(async (entry) => {
       let webhookEvent = entry.messaging[0];
