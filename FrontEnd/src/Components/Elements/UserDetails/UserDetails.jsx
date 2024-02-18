@@ -1,14 +1,14 @@
 import React from "react";
 import "./userDetails.css";
 
-const UserDetails = (props) => {
+const UserDetails = ({ name }) => {
   return (
     <div className="userDetials">
       <div className="username">
         <div className="userIcon">
-          <p>A</p>
+          <p>{name[0]}</p>
         </div>
-        <p className="fullname">Amit RG</p>
+        <p className="fullname">{name}</p>
         <span className="status">• Offline</span>
         <div className="contact">
           <div className="call">
@@ -25,15 +25,15 @@ const UserDetails = (props) => {
         <h2>Customer Details</h2>
         <div className="email">
           <p>Email</p>
-          <p>amit@gmail.com</p>
+          <p>{name.split(" ")[0].toLowerCase()}@gmail.com</p>
         </div>
         <div className="firstName">
           <p>First Name</p>
-          <p>Amit</p>
+          <p>{name.split(" ")[0]}</p>
         </div>
         <div className="lastName">
           <p>Last Name</p>
-          <p>RG</p>
+          <p>{name.split(" ")[1] ? name.split(" ")[1] : "-"}</p>
         </div>
         <button>View more Details</button>
       </div>

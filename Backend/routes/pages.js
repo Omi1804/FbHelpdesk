@@ -117,15 +117,18 @@ async function fetchAndStoreMessages(pageAccessToken, fbConversationId) {
     await Promise.all(
       messages.map(async (msg) => {
         try {
-          const newMessage = new Message({
-            conversationId: conversation._id, // Use MongoDB ObjectId of the Conversation document
-            fbConversationId: conversation.conversationId,
-            messageId: msg.id,
-            messageContent: msg.message,
-            senderId: msg.from.id,
-            timestamp: new Date(msg.created_time),
-          });
-          await newMessage.save();
+          await Message.findOneAndUpdate(
+            { messageId: msg.id },
+            {
+              conversationId: conversation._id,
+              fbConversationId: conversation.conversationId,
+              messageId: msg.id,
+              messageContent: msg.message,
+              senderId: msg.from.id,
+              timestamp: new Date(msg.created_time),
+            },
+            { upsert: true, new: true }
+          );
         } catch (saveError) {
           console.error("Error saving a message:", saveError);
         }

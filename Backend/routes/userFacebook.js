@@ -8,8 +8,6 @@ router.post("/register", authenticateUser, async (req, res) => {
   const { userFacebookId, accessToken } = req.body;
   const { userId } = req.headers;
 
-  console.log(userId);
-
   try {
     if (!userFacebookId || !accessToken) {
       return res.status(400).send("Missing userId or accessToken.");

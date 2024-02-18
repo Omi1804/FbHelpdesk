@@ -38,7 +38,6 @@ router.post("/:conversationId/send", authenticateUser, async (req, res) => {
     }
 
     const pageAccessToken = conversation.pageId.pageAccessToken;
-    const pageId = conversation.pageId.pageId;
 
     if (!pageAccessToken) {
       return res.status(500).send("Page access token not found.");
@@ -47,8 +46,6 @@ router.post("/:conversationId/send", authenticateUser, async (req, res) => {
     const sendMessageUrl = `https://graph.facebook.com/v19.0/me/messages`;
 
     const recipientId = conversation.initiatorFacebookId;
-
-    // console.log(pageAccessToken, pageId, recipientId);
 
     const response = await axios.post(
       sendMessageUrl,

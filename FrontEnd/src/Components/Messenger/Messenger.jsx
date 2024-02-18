@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatDistance } from "date-fns";
 import axios from "axios";
 import "./messenger.css";
 import { useParams } from "react-router-dom";
@@ -55,7 +56,6 @@ const Messenger = () => {
 
       setUserDetails({
         name: selected.initiatorName,
-        profilePic: selected.profilePic, // assuming you have this info
       });
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -64,10 +64,10 @@ const Messenger = () => {
 
   const currentUserId = "186383267901490";
 
-  console.log(conversations);
-  console.log(selectedConversation);
-  console.log(messages);
-  console.log(userDetails);
+  const handleMessageSent = (newMessage) => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  };
+
   return (
     <section className="messengerSec">
       <div className="sec1 navbar">
@@ -75,7 +75,7 @@ const Messenger = () => {
           <li className="link">
             <span class="material-symbols-outlined navIcons">home</span>
           </li>
-          <li className="link">
+          <li className="link selected">
             <span class="material-symbols-outlined navIcons">inbox</span>
           </li>
           <li className="link">
@@ -96,19 +96,27 @@ const Messenger = () => {
           {conversations.map((conv) => (
             <div
               key={conv.conversationId}
-              className="head"
+              // className="head"
+              className={`${
+                selectedConversation && selectedConversation._id === conv._id
+                  ? "selected"
+                  : ""
+              } head`}
               onClick={() => handleConversationClick(conv.conversationId)}
             >
               <div className="nameDetails">
                 <input type="checkbox" />
                 <p>{conv.initiatorName}</p>
-                {/* Convert timestamp to a readable format, e.g., "10m ago". Consider using a library like date-fns or moment.js for more complex formatting */}
                 <span>
-                  {new Date(conv.lastMessageTimestamp).toLocaleTimeString()}
+                  {formatDistance(
+                    new Date(conv.lastMessageTimestamp),
+                    new Date(),
+                    { addSuffix: true }
+                  )}
                 </span>
               </div>
               <div className="lastMsg">
-                <p>{conv.lastMessage}</p>
+                <p>Message : {conv.lastMessage}...</p>
               </div>
             </div>
           ))}
@@ -117,7 +125,12 @@ const Messenger = () => {
       <div className="sec3 conversations">
         {selectedConversation ? (
           <>
-            <ChatUi messages={messages} senderId={currentUserId} />
+            <ChatUi
+              name={selectedConversation.initiatorName}
+              messages={messages}
+              senderId={currentUserId}
+              onMessageSent={handleMessageSent}
+            />
           </>
         ) : (
           <div className="no-messages">Select the Conversations To begin</div>
@@ -126,7 +139,7 @@ const Messenger = () => {
       <div className="sec4 userDetails">
         {userDetails ? (
           <>
-            <UserDetails />
+            <UserDetails name={selectedConversation.initiatorName} />
           </>
         ) : (
           <div className="no-details">No Details</div>

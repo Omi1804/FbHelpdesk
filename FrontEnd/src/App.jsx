@@ -8,7 +8,7 @@ const App = () => {
     <div className="appComponent">
       <BrowserRouter>
         <Routes>
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Integration />} />
           <Route path="/pages" element={<Pages />} />
