@@ -1,0 +1,100 @@
+.userDetails {
+  width: 100%;
+  background-color: rgb(209, 218, 233);
+  height: 100%;
+
+  .username {
+    width: 100%;
+    height: 15rem;
+    padding: 1rem;
+    text-align: center;
+    background-color: white;
+
+    .userIcon {
+      margin: auto;
+      background-color: orange;
+      font-size: 2.5rem;
+      font-weight: 500;
+      width: 4rem;
+      height: 4rem;
+      margin-block: 0.5rem 0.9rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fullname {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .status {
+      font-size: 0.8rem;
+      font-weight: 600;
+      position: relative;
+      right: 0.2rem;
+      bottom: 0.2rem;
+      opacity: 0.7;
+    }
+
+    .contact {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+
+      .call,
+      .profile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(128, 128, 128, 0.42);
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.69);
+        gap: 0.3rem;
+        padding: 0.2rem 0.7rem;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    }
+  }
+  .customerDetails {
+    margin: 1rem 0.5rem;
+    padding: 1rem;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.69);
+
+    > h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .email,
+    .firstName,
+    .lastName {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 500;
+      align-items: center;
+      margin-bottom: 0.4rem;
+
+      > p:first-child {
+        font-size: 0.8rem;
+        color: rgba(0, 0, 0, 0.506);
+      }
+    }
+
+    > button {
+      margin-block-start: 0.5rem;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      background-color: transparent;
+      color: #579ffb;
+    }
+  }
+}
