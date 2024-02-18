@@ -7,7 +7,7 @@ import ChatUi from "../Elements/ChatUi/ChatUi";
 import UserDetails from "../Elements/UserDetails/UserDetails";
 import "./messenger.css";
 
-const POLL_INTERVAL = 1000 * 10;
+const POLL_INTERVAL = 1000 * 5;
 
 const Messenger = () => {
   const params = useParams();
@@ -53,8 +53,10 @@ const Messenger = () => {
   };
 
   // Effect to fetch conversations on component mount and selectedConversation change
+
   useEffect(() => {
     const fetchConversations = async () => {
+      console.log("clicked");
       try {
         const response = await axios.get(
           `${BASE_URL}pages/${pageId}/conversations`,
@@ -69,7 +71,6 @@ const Messenger = () => {
         console.error("Error fetching conversations:", error);
       }
     };
-
     fetchConversations();
   }, [pageId]);
 

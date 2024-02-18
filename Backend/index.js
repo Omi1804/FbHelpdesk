@@ -14,6 +14,10 @@ const cors = require("cors");
 app.use(bodyParser.json());
 app.use(cors());
 
+app.get("/", (req, res) => {
+  res.send("test");
+});
+
 //routes
 app.use("/user", userRoutes);
 app.use("/userFacebook", userFacebook);
